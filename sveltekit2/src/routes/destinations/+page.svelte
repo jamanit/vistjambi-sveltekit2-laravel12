@@ -37,8 +37,8 @@
 			}
 			const result = await res.json();
 			destinations = result.data;
-			currentPage = result.current_page;
-			totalPages = result.last_page;
+			currentPage = result.meta.current_page;
+			totalPages = result.meta.last_page;
 		} catch (err) {
 			apiError = 'Error fetching destinations.';
 			console.error(err);

@@ -15,7 +15,7 @@ class DestinationController extends Controller
     {
         $page = $request->input('page');
         $limit = $request->input('limit', 10);
-        $destinations = Destination::with('category')->orderBy('id', 'desc')
+        $destinations = Destination::orderBy('id', 'desc')
             ->when($page, function ($query) use ($limit) {
                 return $query->paginate($limit);
             }, function ($query) use ($limit) {
