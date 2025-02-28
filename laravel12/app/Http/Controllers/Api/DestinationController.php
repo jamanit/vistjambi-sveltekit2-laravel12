@@ -62,7 +62,7 @@ class DestinationController extends Controller
     public function show($id)
     {
         try {
-            $destination = Destination::with('category')->findOrFail($id);
+            $destination = Destination::findOrFail($id);
 
             // return response()->json($destination, 200);
             return new DestinationResource($destination);
