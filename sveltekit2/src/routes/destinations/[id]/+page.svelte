@@ -56,27 +56,29 @@
 <section>
 	<Breadcrumb {breadcrumbItems} />
 
-	{#if isLoading}
-		<p>Loading...</p>
-	{:else if error}
-		<p>Error: {error}</p>
-	{:else if destination}
-		<div class="overflow-hidden rounded-lg bg-white shadow-lg">
-			<img
-				src={apiBaseURL + '/storage/' + destination.image}
-				alt={destination.name}
-				class="h-96 w-full object-cover"
-			/>
-			<div class="p-6">
-				<h5 class="mb-2 text-xl font-bold">{destination.name}</h5>
-				<div class="mb-2 flex items-center gap-6 text-sm">
-					<p class="text-sm text-gray-600">
-						{new Date(destination.created_at).toLocaleDateString()}
-					</p>
-					<p class="text-sm text-gray-600">{destination.category?.name}</p>
+	<div class="pb-2 pt-6">
+		{#if isLoading}
+			<p>Loading...</p>
+		{:else if error}
+			<p>Error: {error}</p>
+		{:else if destination}
+			<div class="overflow-hidden rounded-lg bg-white shadow-lg">
+				<img
+					src={apiBaseURL + '/storage/' + destination.image}
+					alt={destination.name}
+					class="h-96 w-full object-cover"
+				/>
+				<div class="p-6">
+					<h5 class="mb-2 text-xl font-bold">{destination.name}</h5>
+					<div class="mb-2 flex items-center gap-6 text-sm">
+						<p class="text-sm text-gray-600">
+							{new Date(destination.created_at).toLocaleDateString()}
+						</p>
+						<p class="text-sm text-gray-600">{destination.category?.name}</p>
+					</div>
+					<p class="mb-4 text-base text-gray-700">{@html destination.description}</p>
 				</div>
-				<p class="mb-4 text-base text-gray-700">{@html destination.description}</p>
 			</div>
-		</div>
-	{/if}
+		{/if}
+	</div>
 </section>

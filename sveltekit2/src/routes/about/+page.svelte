@@ -8,4 +8,8 @@
 
 <section>
 	<Breadcrumb {breadcrumbItems} />
+
+	<div class="pb-2 pt-6">
+		<!-- content -->
+	</div>
 </section>
