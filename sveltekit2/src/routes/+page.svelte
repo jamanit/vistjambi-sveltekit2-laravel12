@@ -94,7 +94,6 @@
 				throw new Error(`Failed to fetch messages: ${res.status}`);
 			}
 			const result = await res.json();
-			console.log('Fetched messages:', result);
 			sentMessages = result.data;
 		} catch (err) {
 			apiError = 'Error fetching messages.';
@@ -187,7 +186,7 @@
 					class="rounded-lg border border-gray-300 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
 				></textarea>
 			</div>
-			<div>
+			<div class="mt-6">
 				<button
 					type="submit"
 					disabled={isSending}

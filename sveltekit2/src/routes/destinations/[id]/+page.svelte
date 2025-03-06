@@ -33,7 +33,7 @@
 		try {
 			const response = await fetch(`${apiBaseURL}/api/destinations/${id}`);
 			if (!response.ok) {
-				throw new Error('Failed to fetch destination data');
+				throw new Error('Failed to fetch destination data.');
 			}
 			const result = await response.json();
 			destination = result.data;
@@ -41,7 +41,7 @@
 			if (err instanceof Error) {
 				error = err.message;
 			} else {
-				error = 'An unknown error occurred';
+				error = 'An unknown error occurred.';
 			}
 		} finally {
 			isLoading = false;

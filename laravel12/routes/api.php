@@ -2,13 +2,21 @@
 
 use App\Http\Controllers\Api\MessageController;
 use App\Http\Controllers\Api\DestinationController;
+use App\Http\Controllers\Api\AuthController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/user', function (Request $request) {
-    return $request->user();
-})->middleware('auth:sanctum');
+// Route::get('/user', function (Request $request) {
+//     return $request->user();
+// })->middleware('auth:sanctum');
 
+Route::middleware('api')->group(function () {
+    Route::post('/register', [AuthController::class, 'register']);
+    Route::post('/login', [AuthController::class, 'login']);
+    Route::post('/refresh', [AuthController::class, 'refresh']);
+    Route::get('/me', [AuthController::class, 'me']);
+    Route::get('logout', [AuthController::class, 'logout']);
+});
 
 Route::get('/destinations', [DestinationController::class, 'index']);
 Route::get('/destinations/{id}', [DestinationController::class, 'show']);
