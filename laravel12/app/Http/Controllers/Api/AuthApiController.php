@@ -13,7 +13,7 @@ use Tymon\JWTAuth\Exceptions\JWTException;
 use Illuminate\Validation\ValidationException;
 use Illuminate\Http\Response;
 
-class AuthController extends Controller
+class AuthApiController extends Controller
 {
     public function __construct()
     {
@@ -33,13 +33,10 @@ class AuthController extends Controller
                 throw new ValidationException($validator);
             }
 
-            $user = User::create([
-                'name'     => $request->name,
-                'email'    => $request->email,
-                'password' => Hash::make($request->password),
-            ]);
-
-            $token = JWTAuth::fromUser($user);
+            $data             = $validator->validated();
+            $data['password'] = Hash::make($data['password']);
+            $user             = User::create($data);
+            $token            = JWTAuth::fromUser($user);
 
             return response()->json([
                 'success' => true,
@@ -47,12 +44,26 @@ class AuthController extends Controller
                 'data'    => $user,
                 'token'   => $token,
             ], 201);
+            return response()->json([
+                'success' => true,
+                'message' => 'User registered successfully!',
+                'data'    => $user,
+                'token'   => $token,
+                'token_type' => 'Bearer',
+                'expires_in' => Auth::factory()->getTTL() * 60
+            ], 201);
         } catch (ValidationException $e) {
             return response()->json([
                 'success' => false,
                 'message' => 'Validation failed.',
                 'errors'  => $e->errors(),
             ], Response::HTTP_UNPROCESSABLE_ENTITY);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Something went wrong.',
+                'error'   => $e->getMessage()
+            ], 500);
         }
     }
 
@@ -72,28 +83,57 @@ class AuthController extends Controller
                 return response()->json(['message' => 'Unauthorized access.'], 401);
             }
 
-            return $this->respondWithToken($token);
+            return response()->json([
+                'success' => true,
+                'message' => 'User logged in successfully!',
+                'token'   => $token,
+                'token_type' => 'Bearer',
+                'expires_in' => Auth::factory()->getTTL() * 60
+            ], 200);
         } catch (ValidationException $e) {
             return response()->json([
                 'success' => false,
                 'message' => 'Validation failed.',
                 'errors'  => $e->errors(),
             ], Response::HTTP_UNPROCESSABLE_ENTITY);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Something went wrong.',
+                'error'   => $e->getMessage()
+            ], 500);
         }
     }
 
     public function me()
     {
-        return response()->json(Auth::user());
+        $user = Auth::user();
+
+        if (!$user) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Unauthorized. No token provided or token invalid.',
+            ], 401);
+        }
+
+        return response()->json($user);
     }
 
     public function logout()
     {
         try {
             JWTAuth::invalidate(JWTAuth::getToken());
-            return response()->json(['message' => 'Successfully logged out.']);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Successfully logged out.'
+            ], 200);
         } catch (JWTException $e) {
-            return response()->json(['error' => 'Failed to log out'], 500);
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to log out.',
+                'error'   => $e->getMessage()
+            ], 500);
         }
     }
 
@@ -102,16 +142,21 @@ class AuthController extends Controller
         try {
             return $this->respondWithToken(JWTAuth::refresh(JWTAuth::getToken()));
         } catch (JWTException $e) {
-            return response()->json(['message' => 'Failed to refresh token.'], 500);
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to refresh token.',
+                'error'   => $e->getMessage()
+            ], 500);
         }
     }
 
     protected function respondWithToken($token)
     {
         return response()->json([
+            'success'      => true,
             'access_token' => $token,
-            'token_type' => 'bearer',
-            'expires_in' => JWTAuth::factory()->getTTL() * 60,
+            'token_type'   => 'bearer',
+            'expires_in'   => JWTAuth::factory()->getTTL() * 60,
         ]);
     }
 }

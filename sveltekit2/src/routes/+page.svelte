@@ -110,7 +110,7 @@
 <section>
 	<Breadcrumb {breadcrumbItems} />
 
-	<div class="pt-6 pb-2">
+	<div class="pb-2 pt-6">
 		{#if apiError}
 			<p class="text-red-500">{apiError}</p>
 		{:else if destinations.length === 0}
@@ -124,7 +124,7 @@
 								<img
 									src={apiBaseURL + '/storage/' + destination.image}
 									alt={destination.name}
-									class="mb-2 h-54 w-full rounded-md object-cover"
+									class="h-54 mb-2 w-full rounded-md object-cover"
 								/>
 								<h3 class="text-lg font-semibold">{destination.name}</h3>
 								<div class="flex items-center justify-center gap-6 text-sm">
@@ -150,7 +150,7 @@
 		{/if}
 	</div>
 
-	<div class="mx-auto max-w-2xl pt-6 pb-2">
+	<div class="mx-auto max-w-2xl pb-2 pt-6">
 		<h3 class="mb-4 text-center text-xl font-bold text-gray-800">Contact Us</h3>
 
 		<form on:submit|preventDefault={postMessage}>
@@ -162,7 +162,7 @@
 					id="name"
 					bind:value={name}
 					placeholder="Enter Name"
-					class="rounded-lg border border-gray-300 px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:outline-none"
+					class="rounded-lg border border-gray-300 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
 				/>
 			</div>
 			<div class="mb-4 flex flex-col gap-2">
@@ -173,7 +173,7 @@
 					id="email"
 					bind:value={email}
 					placeholder="Enter Email"
-					class="rounded-lg border border-gray-300 px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:outline-none"
+					class="rounded-lg border border-gray-300 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
 				/>
 			</div>
 			<div class="mb-4 flex flex-col gap-2">
@@ -183,14 +183,14 @@
 					id="message"
 					bind:value={message}
 					placeholder="Enter Message"
-					class="rounded-lg border border-gray-300 px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:outline-none"
+					class="rounded-lg border border-gray-300 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
 				></textarea>
 			</div>
 			<div class="mt-6">
 				<button
 					type="submit"
 					disabled={isSending}
-					class="cursor-pointer rounded-lg bg-blue-500 px-4 py-2 text-white hover:bg-blue-600 focus:ring-2 focus:ring-blue-500 focus:outline-none"
+					class="cursor-pointer rounded-lg bg-blue-500 px-4 py-2 text-white hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
 				>
 					{#if isSending}
 						Sending...
@@ -212,11 +212,11 @@
 				</tr>
 			</thead>
 			<tbody>
-				{#each sentMessages as { name, email, message }}
+				{#each sentMessages as user}
 					<tr class="border-b">
-						<td class="px-4 py-2">{name}</td>
-						<td class="px-4 py-2">{email}</td>
-						<td class="px-4 py-2">{message}</td>
+						<td class="px-4 py-2">{user.name}</td>
+						<td class="px-4 py-2">{user.email}</td>
+						<td class="px-4 py-2">{user.message}</td>
 					</tr>
 				{/each}
 			</tbody>

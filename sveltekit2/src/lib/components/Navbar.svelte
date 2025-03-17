@@ -24,6 +24,7 @@
 		{#if $isLoggedIn}
 			<a href="/dashboard" class="mr-4" data-sveltekit-prefetch>Dashboard</a>
 			<a href="/me" class="mr-4" data-sveltekit-prefetch>Me</a>
+			<a href="/users" class="mr-4" data-sveltekit-prefetch>Users</a>
 			<button
 				class="cursor-pointer rounded-lg bg-red-500 px-4 py-2 text-white hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-500"
 				on:click={handleLogout}

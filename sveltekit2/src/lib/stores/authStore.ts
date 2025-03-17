@@ -13,7 +13,7 @@ export const isLoggedIn = writable(!!storedToken); // Membuat store `isLoggedIn`
 export function login(token: string) {
     // Cek apakah kode dijalankan di browser
     if (typeof window !== 'undefined') {
-        localStorage.setItem('token', token); // Menyimpan token di localStorage
+        localStorage.setItem('token', token); // Menyimpan token di localStorage 
     }
     isLoggedIn.set(true); // Mengubah status login menjadi true
 }

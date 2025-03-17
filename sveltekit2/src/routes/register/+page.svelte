@@ -56,7 +56,7 @@
 			}
 
 			// Jika registrasi berhasil, simpan token akses dan arahkan user ke halaman dashboard
-			login(data.access_token);
+			login(data.token);
 			goto('/dashboard'); // Navigasi ke halaman dashboard
 		} catch (error) {
 			// Jika terjadi error lain (misalnya masalah jaringan), tampilkan pesan error
