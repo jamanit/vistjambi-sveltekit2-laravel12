@@ -1,62 +1,64 @@
 <script lang="ts">
-	// Mengimpor fungsi `goto` untuk navigasi antar halaman dan `login` untuk menyimpan token setelah login
 	import { goto } from '$app/navigation';
 	import { login } from '$lib/stores/authStore';
+	import Swal from 'sweetalert2';
+	import 'sweetalert2/dist/sweetalert2.min.css';
 
-	// Mengambil URL dasar API dari environment variables
 	const apiBaseURL = import.meta.env.VITE_API_BASE_URL;
-
-	// Mendeklarasikan variabel untuk menyimpan input user dan pesan error
 	let email = '';
 	let password = '';
-	let errorMessage = '';
+	let message = '';
 	let errors = { email: '', password: '' };
 	let loading = false;
 
-	// Fungsi untuk menangani login user
-	async function loginUser(event: Event) {
-		event.preventDefault(); // Mencegah halaman untuk reload saat form disubmit
-		loading = true; // Menandakan bahwa proses login sedang berjalan
-		errorMessage = ''; // Menghapus pesan error sebelumnya
-		errors = { email: '', password: '' }; // Menghapus error sebelumnya
+	function showToast(message: string, icon: 'success' | 'error') {
+		Swal.fire({
+			toast: true,
+			position: 'top-end',
+			icon: icon,
+			title: message,
+			showConfirmButton: false,
+			showCloseButton: true,
+			timer: 3000,
+			timerProgressBar: true
+		});
+	}
 
-		// Membuat payload untuk dikirim ke server
+	async function loginUser(event: Event) {
+		event.preventDefault();
+		loading = true;
+		message = '';
+		errors = { email: '', password: '' };
+
 		const payload = { email, password };
 
 		try {
-			// Mengirim request login ke API
 			const response = await fetch(`${apiBaseURL}/api/login`, {
 				method: 'POST',
-				headers: {
-					'Content-Type': 'application/json' // Mengirim data dalam format JSON
-				},
-				body: JSON.stringify(payload) // Mengirimkan email dan password dalam body request
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify(payload)
 			});
 
-			// Mengambil data dari response API
 			const data = await response.json();
 
-			// Mengecek apakah response berhasil atau tidak
 			if (!response.ok) {
-				// Jika ada error validasi dari server, tampilkan pesan error pada masing-masing field
 				if (data.errors) {
-					errors.email = data.errors.email ? data.errors.email[0] : ''; // Menampilkan error email
-					errors.password = data.errors.password ? data.errors.password[0] : ''; // Menampilkan error password
+					errors.email = data.errors.email ? data.errors.email[0] : '';
+					errors.password = data.errors.password ? data.errors.password[0] : '';
+					message = data.message || 'Validation failed.';
 				} else {
-					// Jika tidak ada error spesifik, tampilkan error umum
-					errorMessage = data.message || 'Login failed, please try again.';
+					message = data.message || 'Incorrect email or password. Please try again.';
 				}
-				return; // Keluar dari fungsi jika ada error
+				showToast(message, 'error');
+				return;
 			}
 
-			// Jika login berhasil, simpan token akses dan arahkan user ke halaman dashboard
 			login(data.token);
-			goto('/dashboard'); // Navigasi ke halaman dashboard
-		} catch (error) {
-			// Jika terjadi error lain (misalnya masalah jaringan), tampilkan pesan error
-			errorMessage = 'Something went wrong, please try again later.';
+			goto('/dashboard');
+		} catch {
+			message = 'Network error. Please try again later.';
+			showToast(message, 'error');
 		} finally {
-			// Menandakan bahwa proses login telah selesai
 			loading = false;
 		}
 	}
@@ -65,10 +67,6 @@
 <section>
 	<div class="mx-auto max-w-lg pb-2 pt-6">
 		<h3 class="mb-4 text-center text-xl font-bold text-gray-800">Login</h3>
-
-		{#if errorMessage}
-			<p class="mb-4 text-center text-red-500">{errorMessage}</p>
-		{/if}
 
 		<form on:submit={loginUser}>
 			<div class="mb-3 flex flex-col gap-2">

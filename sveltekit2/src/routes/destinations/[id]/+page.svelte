@@ -22,12 +22,11 @@
 		created_at: string;
 	};
 
+	const apiBaseURL = import.meta.env.VITE_API_BASE_URL;
 	let { id } = $page.params;
 	let destination: Destination | null = null;
 	let isLoading = true;
 	let error: string | null = null;
-
-	const apiBaseURL = import.meta.env.VITE_API_BASE_URL;
 
 	async function fetchDestination(id: number) {
 		try {

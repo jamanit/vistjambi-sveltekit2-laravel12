@@ -1,68 +1,72 @@
 <script lang="ts">
-	// Mengimpor fungsi `goto` untuk navigasi antar halaman dan `login` untuk menyimpan token setelah registrasi
 	import { goto } from '$app/navigation';
 	import { login } from '$lib/stores/authStore';
+	import Swal from 'sweetalert2';
+	import 'sweetalert2/dist/sweetalert2.min.css';
 
-	// Mengambil URL dasar API dari environment variables
 	const apiBaseURL = import.meta.env.VITE_API_BASE_URL;
-
-	// Mendeklarasikan variabel untuk menyimpan input user dan pesan error
 	let name = '';
 	let email = '';
 	let password = '';
 	let password_confirmation = '';
-	let errorMessage = '';
+	let message = '';
 	let errors = { name: '', email: '', password: '', password_confirmation: '' };
 	let loading = false;
 
-	// Fungsi untuk menangani registrasi user
-	async function registerUser(event: Event) {
-		event.preventDefault(); // Mencegah halaman untuk reload saat form disubmit
-		loading = true; // Menandakan bahwa proses registrasi sedang berjalan
-		errorMessage = ''; // Menghapus pesan error sebelumnya
-		errors = { name: '', email: '', password: '', password_confirmation: '' }; // Menghapus error sebelumnya
+	function showToast(message: string, icon: 'success' | 'error') {
+		Swal.fire({
+			toast: true,
+			position: 'top-end',
+			icon: icon,
+			title: message,
+			showConfirmButton: false,
+			showCloseButton: true,
+			timer: 3000,
+			timerProgressBar: true
+		});
+	}
 
-		// Membuat payload untuk dikirim ke server
+	async function registerUser(event: Event) {
+		event.preventDefault();
+		loading = true;
+		message = '';
+		errors = { name: '', email: '', password: '', password_confirmation: '' };
+
 		const payload = { name, email, password, password_confirmation };
 
 		try {
-			// Mengirim request registrasi ke API
 			const response = await fetch(`${apiBaseURL}/api/register`, {
 				method: 'POST',
 				headers: {
-					'Content-Type': 'application/json' // Mengirim data dalam format JSON
+					'Content-Type': 'application/json'
 				},
-				body: JSON.stringify(payload) // Mengirimkan data registrasi dalam body request
+				body: JSON.stringify(payload)
 			});
 
-			// Mengambil data dari response API
 			const data = await response.json();
 
-			// Mengecek apakah response berhasil atau tidak
 			if (!response.ok) {
-				// Jika ada error validasi dari server, tampilkan pesan error pada masing-masing field
 				if (data.errors) {
-					errors.name = data.errors.name ? data.errors.name[0] : ''; // Menampilkan error name
-					errors.email = data.errors.email ? data.errors.email[0] : ''; // Menampilkan error email
-					errors.password = data.errors.password ? data.errors.password[0] : ''; // Menampilkan error password
+					errors.name = data.errors.name ? data.errors.name[0] : '';
+					errors.email = data.errors.email ? data.errors.email[0] : '';
+					errors.password = data.errors.password ? data.errors.password[0] : '';
 					errors.password_confirmation = data.errors.password_confirmation
 						? data.errors.password_confirmation[0]
-						: ''; // Menampilkan error password_confirmation
+						: '';
+					message = data.message || 'Validation failed.';
 				} else {
-					// Jika tidak ada error spesifik, tampilkan error umum
-					errorMessage = data.message || 'Registration failed, please try again.';
+					message = data.message || 'Registration failed, please try again.';
 				}
-				return; // Keluar dari fungsi jika ada error
+				showToast(message, 'error');
+				return;
 			}
 
-			// Jika registrasi berhasil, simpan token akses dan arahkan user ke halaman dashboard
 			login(data.token);
-			goto('/dashboard'); // Navigasi ke halaman dashboard
+			goto('/dashboard');
 		} catch (error) {
-			// Jika terjadi error lain (misalnya masalah jaringan), tampilkan pesan error
-			errorMessage = 'Something went wrong, please try again later.';
+			message = 'An error occurred. Please try again later.';
+			showToast(message, 'error');
 		} finally {
-			// Menandakan bahwa proses registrasi telah selesai
 			loading = false;
 		}
 	}
@@ -71,10 +75,6 @@
 <section>
 	<div class="mx-auto max-w-lg pb-2 pt-6">
 		<h3 class="mb-4 text-center text-xl font-bold text-gray-800">Register</h3>
-
-		{#if errorMessage}
-			<p class="mb-4 text-center text-red-500">{errorMessage}</p>
-		{/if}
 
 		<form on:submit={registerUser}>
 			<div class="mb-3 flex flex-col gap-2">

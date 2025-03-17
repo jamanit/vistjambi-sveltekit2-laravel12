@@ -20,12 +20,12 @@
 		created_at: string;
 	};
 
+	const apiBaseURL = import.meta.env.VITE_API_BASE_URL;
 	let destinations: Destination[] = [];
 	let currentPage = 1;
 	let limit = 5;
 	let totalPages = 1;
 	let apiError = '';
-	const apiBaseURL = import.meta.env.VITE_API_BASE_URL;
 
 	async function getDestinations(page: number = 1) {
 		try {
