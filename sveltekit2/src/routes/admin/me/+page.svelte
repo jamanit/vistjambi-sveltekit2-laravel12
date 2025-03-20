@@ -1,11 +1,14 @@
 <script lang="ts">
+	import { authMiddleware } from '$lib/middleware/authMiddleware';
 	import { onMount } from 'svelte';
 	import Breadcrumb from '$lib/components/Breadcrumb.svelte';
-	import Swal from 'sweetalert2';
-	import 'sweetalert2/dist/sweetalert2.min.css';
+	import { showToast } from '$lib/utils/toast';
+	import authFetch from '$lib/auth/authFetch';
+
+	authMiddleware();
 
 	let breadcrumbItems = [
-		{ name: 'Home', url: '/' },
+		{ name: 'Dashboard', url: '/admin' },
 		{ name: 'Me', url: '', isActive: true }
 	];
 
@@ -18,19 +21,6 @@
 		email: string;
 	}
 
-	function showToast(message: string, icon: 'success' | 'error') {
-		Swal.fire({
-			toast: true,
-			position: 'top-end',
-			icon: icon,
-			title: message,
-			showConfirmButton: false,
-			showCloseButton: true,
-			timer: 3000,
-			timerProgressBar: true
-		});
-	}
-
 	onMount(async () => {
 		const token = localStorage.getItem('token');
 
@@ -41,15 +31,11 @@
 		}
 
 		try {
-			const response = await fetch(`${apiBaseURL}/api/me`, {
-				method: 'GET',
-				headers: {
-					Authorization: `Bearer ${token}`,
-					'Content-Type': 'application/json'
-				}
+			const response = await authFetch(`${apiBaseURL}/api/me`, {
+				method: 'GET'
 			});
 
-			const data = await response.json();
+			const responseBody = await response.json();
 
 			if (!response.ok) {
 				message = 'Failed to fetch user data.';
@@ -57,7 +43,7 @@
 				return;
 			}
 
-			user = data;
+			user = responseBody.data.user;
 		} catch (error) {
 			message = 'Something went wrong, please try again later.';
 			showToast(message, 'error');

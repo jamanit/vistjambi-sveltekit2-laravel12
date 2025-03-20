@@ -1,8 +1,13 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
-	import { login } from '$lib/stores/authStore';
-	import Swal from 'sweetalert2';
-	import 'sweetalert2/dist/sweetalert2.min.css';
+	import { login, isLoggedIn } from '$lib/stores/authStore';
+	import { showToast } from '$lib/utils/toast';
+
+	$: {
+		if ($isLoggedIn) {
+			goto('/admin');
+		}
+	}
 
 	const apiBaseURL = import.meta.env.VITE_API_BASE_URL;
 	let email = '';
@@ -10,19 +15,6 @@
 	let message = '';
 	let errors = { email: '', password: '' };
 	let loading = false;
-
-	function showToast(message: string, icon: 'success' | 'error') {
-		Swal.fire({
-			toast: true,
-			position: 'top-end',
-			icon: icon,
-			title: message,
-			showConfirmButton: false,
-			showCloseButton: true,
-			timer: 3000,
-			timerProgressBar: true
-		});
-	}
 
 	async function loginUser(event: Event) {
 		event.preventDefault();
@@ -39,22 +31,22 @@
 				body: JSON.stringify(payload)
 			});
 
-			const data = await response.json();
+			const responseBody = await response.json();
 
 			if (!response.ok) {
-				if (data.errors) {
-					errors.email = data.errors.email ? data.errors.email[0] : '';
-					errors.password = data.errors.password ? data.errors.password[0] : '';
-					message = data.message || 'Validation failed.';
+				if (responseBody.errors) {
+					errors.email = responseBody.errors.email ? responseBody.errors.email[0] : '';
+					errors.password = responseBody.errors.password ? responseBody.errors.password[0] : '';
+					message = responseBody.message || 'Validation failed.';
 				} else {
-					message = data.message || 'Incorrect email or password. Please try again.';
+					message = responseBody.message || 'Incorrect email or password. Please try again.';
 				}
 				showToast(message, 'error');
 				return;
 			}
 
-			login(data.token);
-			goto('/dashboard');
+			login(responseBody.data.token);
+			goto('/admin');
 		} catch {
 			message = 'Network error. Please try again later.';
 			showToast(message, 'error');

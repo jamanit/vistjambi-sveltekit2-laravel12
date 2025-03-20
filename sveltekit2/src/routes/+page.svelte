@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import Breadcrumb from '$lib/components/Breadcrumb.svelte';
+	import SubmitButton from '$lib/components/Button.svelte';
 	import Swal from 'sweetalert2';
 	import 'sweetalert2/dist/sweetalert2.min.css';
 
@@ -25,7 +26,7 @@
 	let name = '';
 	let email = '';
 	let message = '';
-	let loading = false;
+	let isLoading = false;
 	let notifMessage = '';
 	let fetchMessages: { name: string; email: string; message: string }[] = [];
 
@@ -71,7 +72,7 @@
 			message
 		};
 
-		loading = true;
+		isLoading = true;
 
 		try {
 			const res = await fetch(apiBaseURL + `/api/messages`, {
@@ -96,7 +97,7 @@
 			notifMessage = 'Error sending message. Please try again.';
 			showToast(notifMessage, 'error');
 		} finally {
-			loading = false;
+			isLoading = false;
 		}
 	}
 
@@ -207,17 +208,7 @@
 				></textarea>
 			</div>
 			<div class="mt-6">
-				<button
-					type="submit"
-					disabled={loading}
-					class="cursor-pointer rounded-lg bg-blue-500 px-4 py-2 text-white hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
-				>
-					{#if loading}
-						Sending...
-					{:else}
-						Send Message
-					{/if}
-				</button>
+				<SubmitButton buttonLoading={isLoading} buttonText="Send Message" buttonColor="blue" />
 			</div>
 		</form>
 

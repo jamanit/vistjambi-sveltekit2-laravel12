@@ -13,10 +13,11 @@ use Illuminate\Support\Facades\Route;
 
 Route::post('/register', [AuthApiController::class, 'register']);
 Route::post('/login', [AuthApiController::class, 'login']);
+Route::post('/refresh', [AuthApiController::class, 'refresh']);
 Route::middleware(['auth:api'])->group(function () {
-    Route::post('/refresh', [AuthApiController::class, 'refresh']);
     Route::get('/me', [AuthApiController::class, 'me']);
     Route::get('logout', [AuthApiController::class, 'logout']);
+    Route::get('check-token', [AuthApiController::class, 'checkTokenValidity']);
 });
 
 Route::get('/destinations', [DestinationApiController::class, 'index']);

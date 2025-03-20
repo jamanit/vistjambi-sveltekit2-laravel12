@@ -1,9 +1,10 @@
 <script lang="ts">
+	import { authMiddleware } from '$lib/middleware/authMiddleware';
 	import Breadcrumb from '$lib/components/Breadcrumb.svelte';
-	let breadcrumbItems = [
-		{ name: 'Home', url: '/' },
-		{ name: 'Dashboard', url: '', isActive: true }
-	];
+
+	authMiddleware();
+
+	let breadcrumbItems = [{ name: 'Dashboard', url: '', isActive: true }];
 </script>
 
 <section>

@@ -1,12 +1,18 @@
 <script lang="ts">
+	import { authMiddleware } from '$lib/middleware/authMiddleware';
 	import { onMount } from 'svelte';
 	import { goto } from '$app/navigation';
 	import Breadcrumb from '$lib/components/Breadcrumb.svelte';
+	import Button from '$lib/components/Button.svelte';
 	import Swal from 'sweetalert2';
 	import 'sweetalert2/dist/sweetalert2.min.css';
+	import { showToast } from '$lib/utils/toast';
+	import authFetch from '$lib/auth/authFetch';
+
+	authMiddleware();
 
 	let breadcrumbItems = [
-		{ name: 'Home', url: '/' },
+		{ name: 'Dashboard', url: '/admin' },
 		{ name: 'Users', url: '', isActive: true }
 	];
 
@@ -20,43 +26,15 @@
 		email: string;
 	}
 
-	function showToast(message: string, icon: 'success' | 'error') {
-		Swal.fire({
-			toast: true,
-			position: 'top-end',
-			icon: icon,
-			title: message,
-			showConfirmButton: false,
-			showCloseButton: true,
-			timer: 3000,
-			timerProgressBar: true
-		});
-	}
-
 	onMount(() => {
 		getUsers();
 	});
 
 	async function getUsers() {
-		const token = localStorage.getItem('token');
-		if (!token) {
-			message = 'You are not authenticated. Please log in.';
-			showToast(message, 'error');
-			return;
-		}
-
 		try {
-			const response = await fetch(`${apiBaseURL}/api/users`, {
-				method: 'GET',
-				headers: {
-					Authorization: `Bearer ${token}`,
-					'Content-Type': 'application/json'
-				}
+			const response = await authFetch(`${apiBaseURL}/api/users`, {
+				method: 'GET'
 			});
-
-			if (!response.ok) {
-				throw new Error(`Failed to fetch users: ${response.status}`);
-			}
 
 			const result = await response.json();
 			dataUsers = result.data;
@@ -68,13 +46,6 @@
 	}
 
 	async function deleteUser(userId: string) {
-		const token = localStorage.getItem('token');
-		if (!token) {
-			message = 'You are not authenticated. Please log in.';
-			showToast(message, 'error');
-			return;
-		}
-
 		Swal.fire({
 			title: 'Are you sure?',
 			text: 'Do you really want to delete this user?',
@@ -88,16 +59,12 @@
 			if (!result.isConfirmed) return;
 
 			try {
-				const response = await fetch(`${apiBaseURL}/api/users/${userId}`, {
-					method: 'DELETE',
-					headers: {
-						Authorization: `Bearer ${token}`,
-						'Content-Type': 'application/json'
-					}
+				const response = await authFetch(`${apiBaseURL}/api/users/${userId}`, {
+					method: 'DELETE'
 				});
 
 				if (!response.ok) {
-					throw new Error(`Failed to delete user: ${response.status}`);
+					throw new Error(`Failed to fetch users: ${response.status}`);
 				}
 
 				dataUsers = dataUsers.filter((user) => user.id !== userId);
@@ -115,11 +82,11 @@
 	}
 
 	function addUser() {
-		goto('/users/create');
+		goto('/admin/users/create');
 	}
 
 	function editUser(userId: string) {
-		goto(`/users/edit/${userId}`);
+		goto(`/admin/users/edit/${userId}`);
 	}
 </script>
 

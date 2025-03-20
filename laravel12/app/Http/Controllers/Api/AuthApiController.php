@@ -12,14 +12,10 @@ use Tymon\JWTAuth\Facades\JWTAuth;
 use Tymon\JWTAuth\Exceptions\JWTException;
 use Illuminate\Validation\ValidationException;
 use Illuminate\Http\Response;
+use Illuminate\Support\Facades\Log;
 
 class AuthApiController extends Controller
 {
-    public function __construct()
-    {
-        // 
-    }
-
     public function register(Request $request)
     {
         try {
@@ -41,16 +37,12 @@ class AuthApiController extends Controller
             return response()->json([
                 'success' => true,
                 'message' => 'User registered successfully!',
-                'data'    => $user,
-                'token'   => $token,
-            ], 201);
-            return response()->json([
-                'success' => true,
-                'message' => 'User registered successfully!',
-                'data'    => $user,
-                'token'   => $token,
-                'token_type' => 'Bearer',
-                'expires_in' => Auth::factory()->getTTL() * 60
+                'data'    => [
+                    'user'       => $user,
+                    'token'      => $token,
+                    'token_type' => 'Bearer',
+                    'expires_in' => Auth::factory()->getTTL() * 60,
+                ]
             ], 201);
         } catch (ValidationException $e) {
             return response()->json([
@@ -62,7 +54,7 @@ class AuthApiController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => 'Something went wrong.',
-                'error'   => $e->getMessage()
+                'error'   => $e->getMessage(),
             ], 500);
         }
     }
@@ -86,9 +78,11 @@ class AuthApiController extends Controller
             return response()->json([
                 'success' => true,
                 'message' => 'User logged in successfully!',
-                'token'   => $token,
-                'token_type' => 'Bearer',
-                'expires_in' => Auth::factory()->getTTL() * 60
+                'data'    => [
+                    'token'      => $token,
+                    'token_type' => 'Bearer',
+                    'expires_in' => Auth::factory()->getTTL() * 60,
+                ]
             ], 200);
         } catch (ValidationException $e) {
             return response()->json([
@@ -100,7 +94,7 @@ class AuthApiController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => 'Something went wrong.',
-                'error'   => $e->getMessage()
+                'error'   => $e->getMessage(),
             ], 500);
         }
     }
@@ -116,7 +110,12 @@ class AuthApiController extends Controller
             ], 401);
         }
 
-        return response()->json($user);
+        return response()->json([
+            'success' => true,
+            'data'    => [
+                'user' => $user,
+            ]
+        ], 200);
     }
 
     public function logout()
@@ -126,13 +125,13 @@ class AuthApiController extends Controller
 
             return response()->json([
                 'success' => true,
-                'message' => 'Successfully logged out.'
+                'message' => 'Successfully logged out.',
             ], 200);
         } catch (JWTException $e) {
             return response()->json([
                 'success' => false,
                 'message' => 'Failed to log out.',
-                'error'   => $e->getMessage()
+                'error'   => $e->getMessage(),
             ], 500);
         }
     }
@@ -140,23 +139,68 @@ class AuthApiController extends Controller
     public function refresh()
     {
         try {
-            return $this->respondWithToken(JWTAuth::refresh(JWTAuth::getToken()));
+            if (!$token = JWTAuth::getToken()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Token is missing.',
+                ], 400);
+            }
+
+            if (!JWTAuth::parseToken()->check()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Token has expired.',
+                ], 401);
+            }
+
+            $newToken = JWTAuth::refresh($token);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Token refresh successfully!',
+                'data'    => [
+                    'token'      => $newToken,
+                    'token_type' => 'Bearer',
+                    'expires_in' => JWTAuth::factory()->getTTL() * 60,
+                ]
+            ], 200);
         } catch (JWTException $e) {
             return response()->json([
                 'success' => false,
                 'message' => 'Failed to refresh token.',
-                'error'   => $e->getMessage()
+                'error'   => $e->getMessage(),
             ], 500);
         }
     }
 
-    protected function respondWithToken($token)
+    public function checkTokenValidity()
     {
-        return response()->json([
-            'success'      => true,
-            'access_token' => $token,
-            'token_type'   => 'bearer',
-            'expires_in'   => JWTAuth::factory()->getTTL() * 60,
-        ]);
+        try {
+            if (!$token = JWTAuth::getToken()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Token is missing or invalid.',
+                ], 400);
+            }
+
+            $user = JWTAuth::toUser($token);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Token is valid.',
+                'data'    => [
+                    'token'      => (string) $token,
+                    'token_type' => 'Bearer',
+                    'expires_in' => JWTAuth::factory()->getTTL() * 60,
+                    'user'       => $user,
+                ]
+            ], 200);
+        } catch (JWTException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Token verification failed.',
+                'error'   => $e->getMessage(),
+            ], 500);
+        }
     }
 }

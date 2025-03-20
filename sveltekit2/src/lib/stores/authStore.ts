@@ -1,28 +1,24 @@
-import { writable } from 'svelte/store'; // Mengimpor fungsi untuk membuat store (penyimpan data) di Svelte
+// src/lib/stores/authStore.ts
+import { writable } from 'svelte/store';
 
-let storedToken: string | null = null; // Menyimpan token, bisa berisi string atau null (kosong)
+let storedToken: string | null = null;
 
-// Mengecek apakah kode ini dijalankan di browser (bukan server)
 if (typeof window !== 'undefined') {
-    storedToken = localStorage.getItem('token'); // Mengambil token yang disimpan di browser (localStorage)
+    storedToken = localStorage.getItem('token');
 }
 
-export const isLoggedIn = writable(!!storedToken); // Membuat store `isLoggedIn`, berisi true jika ada token, false jika tidak ada
+export const isLoggedIn = writable(!!storedToken);
 
-// Fungsi untuk login
 export function login(token: string) {
-    // Cek apakah kode dijalankan di browser
     if (typeof window !== 'undefined') {
-        localStorage.setItem('token', token); // Menyimpan token di localStorage 
+        localStorage.setItem('token', token);
     }
-    isLoggedIn.set(true); // Mengubah status login menjadi true
+    isLoggedIn.set(true);
 }
 
-// Fungsi untuk logout
 export function logout() {
-    // Cek apakah kode dijalankan di browser
     if (typeof window !== 'undefined') {
-        localStorage.removeItem('token'); // Menghapus token dari localStorage
+        localStorage.removeItem('token');
     }
-    isLoggedIn.set(false); // Mengubah status login menjadi false
-}
+    isLoggedIn.set(false);
+} 

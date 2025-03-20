@@ -47,7 +47,9 @@ class UserApiController extends Controller
             return response()->json([
                 'success' => true,
                 'message' => 'User created successfully.',
-                'data'    => new UserResource($user)
+                'data'    => [
+                    'user' => new UserResource($user),
+                ]
             ], 201);
         } catch (ValidationException $e) {
             return response()->json([
@@ -72,7 +74,9 @@ class UserApiController extends Controller
             return response()->json([
                 'success' => true,
                 'message' => 'User retrieved successfully.',
-                'data'    => new UserResource($user)
+                'data'    => [
+                    'user' => new UserResource($user),
+                ]
             ], 200);
         } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
             return response()->json([
@@ -113,7 +117,9 @@ class UserApiController extends Controller
             return response()->json([
                 'success' => true,
                 'message' => 'User updated successfully.',
-                'data'    => new UserResource($user)
+                'data'    => [
+                    'user' => new UserResource($user),
+                ]
             ], 200);
         } catch (ValidationException $e) {
             return response()->json([

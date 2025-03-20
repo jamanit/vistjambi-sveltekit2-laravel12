@@ -1,8 +1,13 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
-	import { login } from '$lib/stores/authStore';
-	import Swal from 'sweetalert2';
-	import 'sweetalert2/dist/sweetalert2.min.css';
+	import { login, isLoggedIn } from '$lib/stores/authStore';
+	import { showToast } from '$lib/utils/toast';
+
+	$: {
+		if ($isLoggedIn) {
+			goto('/admin');
+		}
+	}
 
 	const apiBaseURL = import.meta.env.VITE_API_BASE_URL;
 	let name = '';
@@ -12,19 +17,6 @@
 	let message = '';
 	let errors = { name: '', email: '', password: '', password_confirmation: '' };
 	let loading = false;
-
-	function showToast(message: string, icon: 'success' | 'error') {
-		Swal.fire({
-			toast: true,
-			position: 'top-end',
-			icon: icon,
-			title: message,
-			showConfirmButton: false,
-			showCloseButton: true,
-			timer: 3000,
-			timerProgressBar: true
-		});
-	}
 
 	async function registerUser(event: Event) {
 		event.preventDefault();
@@ -43,26 +35,26 @@
 				body: JSON.stringify(payload)
 			});
 
-			const data = await response.json();
+			const responseBody = await response.json();
 
 			if (!response.ok) {
-				if (data.errors) {
-					errors.name = data.errors.name ? data.errors.name[0] : '';
-					errors.email = data.errors.email ? data.errors.email[0] : '';
-					errors.password = data.errors.password ? data.errors.password[0] : '';
-					errors.password_confirmation = data.errors.password_confirmation
-						? data.errors.password_confirmation[0]
+				if (responseBody.errors) {
+					errors.name = responseBody.errors.name ? responseBody.errors.name[0] : '';
+					errors.email = responseBody.errors.email ? responseBody.errors.email[0] : '';
+					errors.password = responseBody.errors.password ? responseBody.errors.password[0] : '';
+					errors.password_confirmation = responseBody.errors.password_confirmation
+						? responseBody.errors.password_confirmation[0]
 						: '';
-					message = data.message || 'Validation failed.';
+					message = responseBody.message || 'Validation failed.';
 				} else {
-					message = data.message || 'Registration failed, please try again.';
+					message = responseBody.message || 'Registration failed, please try again.';
 				}
 				showToast(message, 'error');
 				return;
 			}
 
-			login(data.token);
-			goto('/dashboard');
+			login(responseBody.data.token);
+			goto('/admin');
 		} catch (error) {
 			message = 'An error occurred. Please try again later.';
 			showToast(message, 'error');
