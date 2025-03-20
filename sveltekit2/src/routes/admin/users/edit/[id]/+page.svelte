@@ -2,7 +2,7 @@
 	import { authMiddleware } from '$lib/middleware/authMiddleware';
 	import { onMount } from 'svelte';
 	import Breadcrumb from '$lib/components/Breadcrumb.svelte';
-	import SubmitButton from '$lib/components/Button.svelte';
+	import Button from '$lib/components/Button.svelte';
 	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
 	import { showToast } from '$lib/utils/toast';
@@ -176,7 +176,7 @@
 				{/if}
 			</div>
 
-			<SubmitButton
+			<Button
 				buttonType="submit"
 				buttonLoading={isLoading}
 				buttonText="Update"
